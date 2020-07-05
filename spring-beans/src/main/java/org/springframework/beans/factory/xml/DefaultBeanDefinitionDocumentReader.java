@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -129,6 +130,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		this.delegate = createDelegate(getReaderContext(), root, parent);
 
 		if (this.delegate.isDefaultNamespace(root)) {
+			/**
+			 * 读取{@link DefaultBeanDefinitionDocumentReader#PROFILE_ATTRIBUTE}属性
+			 * <beans profile ＝"dev">
+			 *     ...
+			 * </beans>
+			 */
 			String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
 			if (StringUtils.hasText(profileSpec)) {
 				String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
@@ -145,8 +152,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			}
 		}
 
+		//空方法，设计模式之模板方法模式
 		preProcessXml(root);
+		//代理类进行解析beanDefinition
 		parseBeanDefinitions(root, this.delegate);
+
+		//空方法，设计模式之模板方法模式
 		postProcessXml(root);
 
 		this.delegate = parent;
@@ -166,6 +177,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * @param root the DOM root element of the document
 	 */
 	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
+		/**
+		 * 如果是spring默认的namespace
+		 * {@link BeanDefinitionParserDelegate#BEANS_NAMESPACE_URI}
+		 */
 		if (delegate.isDefaultNamespace(root)) {
 			NodeList nl = root.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {
@@ -303,8 +318,14 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * and registering it with the registry.
 	 */
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
+		/**
+		 * {@link BeanDefinitionHolder}中包含了{@link BeanDefinition},已经将文件中定义的内容解析成功
+		 */
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
+			/**
+			 * 对dbHolder进行装饰，处理节点及子节点的自定义属性
+			 */
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
 				// Register the final decorated instance.

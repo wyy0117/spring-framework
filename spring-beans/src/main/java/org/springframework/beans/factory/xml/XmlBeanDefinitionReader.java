@@ -266,6 +266,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		if (this.entityResolver == null) {
 			// Determine default EntityResolver to use.
 			ResourceLoader resourceLoader = getResourceLoader();
+			//构造器中初始化了resourceLoader，理论上不会为null
 			if (resourceLoader != null) {
 				this.entityResolver = new ResourceEntityResolver(resourceLoader);
 			}
@@ -307,6 +308,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	@Override
 	public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
+		//对resource设置encode和charset
 		return loadBeanDefinitions(new EncodedResource(resource));
 	}
 
@@ -330,9 +332,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
 		}
 
+		//从encode后的resource中去除inputStream
 		try (InputStream inputStream = encodedResource.getResource().getInputStream()) {
 			InputSource inputSource = new InputSource(inputStream);
 			if (encodedResource.getEncoding() != null) {
+				//设置encode
 				inputSource.setEncoding(encodedResource.getEncoding());
 			}
 			return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
@@ -387,7 +391,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			throws BeanDefinitionStoreException {
 
 		try {
+			//解析出document
 			Document doc = doLoadDocument(inputSource, resource);
+			//解析document，注册BeanDefinition
 			int count = registerBeanDefinitions(doc, resource);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loaded " + count + " bean definitions from " + resource);
@@ -441,11 +447,21 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * mode, even when something other than {@link #VALIDATION_AUTO} was set.
 	 * @see #detectValidationMode
 	 */
+	/**
+	 * 1. 先判断自定义设置的是否与auto的一致，如果不一致返回设置的
+	 * 2. 否则从resource中解析
+	 *
+	 * @param resource
+	 * @return
+	 */
 	protected int getValidationModeForResource(Resource resource) {
 		int validationModeToUse = getValidationMode();
 		if (validationModeToUse != VALIDATION_AUTO) {
 			return validationModeToUse;
 		}
+		/**
+		 * 使用BufferedReader的readline，判断是否包含{@link XmlValidationModeDetector#DOCTYPE}
+		 */
 		int detectedMode = detectValidationMode(resource);
 		if (detectedMode != VALIDATION_AUTO) {
 			return detectedMode;

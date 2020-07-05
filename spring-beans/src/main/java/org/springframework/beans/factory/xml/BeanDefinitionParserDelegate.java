@@ -417,11 +417,13 @@ public class BeanDefinitionParserDelegate {
 
 		List<String> aliases = new ArrayList<>();
 		if (StringUtils.hasLength(nameAttr)) {
+			//按照逗号，分号，空格解析为数组
 			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			aliases.addAll(Arrays.asList(nameArr));
 		}
 
 		String beanName = id;
+		//id为空且aliases不为空，beanName为第一个alias
 		if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
 			beanName = aliases.remove(0);
 			if (logger.isTraceEnabled()) {
@@ -431,6 +433,7 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		if (containingBean == null) {
+			//bean和aliases都要unique，因为要把具体哪个element不是unique，所以传参包含element
 			checkNameUniqueness(beanName, aliases, ele);
 		}
 
@@ -514,9 +517,18 @@ public class BeanDefinitionParserDelegate {
 		try {
 			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
 
+			//解析<bean>中的属性信息
 			parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
 			bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
 
+			/**
+			 * <bean id＝"myTestBean" class="bean.MyTestBean">
+			 * <meta key=” testStr " value= ” aaaaaaaa ” />
+			 * </bean＞
+			 */
+			/**
+			 * 解析元数据信息，可以通过{@link BeanMetadataAttributeAccessor#getAttribute(java.lang.String)}获取
+			 */
 			parseMetaElements(ele, bd);
 			parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
 			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
@@ -564,6 +576,9 @@ public class BeanDefinitionParserDelegate {
 		}
 		else if (containingBean != null) {
 			// Take default from containing bean in case of an inner bean definition.
+			/**
+			 * 默认的scope其实是空字符串 {@link AbstractBeanDefinition#scope}
+			 */
 			bd.setScope(containingBean.getScope());
 		}
 
@@ -572,6 +587,9 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
+		/**
+		 * 空字符或者 {@link BeanDefinitionParserDelegate#DEFAULT_VALUE}
+		 */
 		if (isDefaultValue(lazyInit)) {
 			lazyInit = this.defaults.getLazyInit();
 		}
@@ -605,6 +623,7 @@ public class BeanDefinitionParserDelegate {
 			String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
 			bd.setInitMethodName(initMethodName);
 		}
+		//如果配置文件中无init-method属性，再判断定义的默认的配置中是否有init-method
 		else if (this.defaults.getInitMethod() != null) {
 			bd.setInitMethodName(this.defaults.getInitMethod());
 			bd.setEnforceInitMethod(false);
@@ -730,6 +749,23 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse lookup-override sub-elements of the given bean element.
 	 */
+	/**
+	 * <pre>
+	 * public abstract class GetBeanTest {
+	 * 	 public void showMe () {
+	 * 	   this.getBean().showMe() ;
+	 * 	 }
+	 * 	 public abstract User getBean ( ) ;
+	 * }
+	 *  <bean id="getBeanTest" class="test.lookup.app.GetBeanTest">
+	 * 	  	     <lookup-method name="getBean" bean="teacher"/>
+	 *  </bean>
+	 *  <bean id teacher class="test.lookup.bean.Teacher"/>
+	 *
+	 * </pre>
+	 * @param beanEle
+	 * @param overrides
+	 */
 	public void parseLookupOverrideSubElements(Element beanEle, MethodOverrides overrides) {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -747,6 +783,33 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Parse replaced-method sub-elements of the given bean element.
+	 */
+	/**
+	 * <pre>
+	 *
+	 * public class LookupMethodBean {
+	 *  public void test()
+	 *  {
+	 *   System.out.println("原始方法!");
+	 *  }
+	 *  }
+	 *
+	 *  public class MethodReplace implements MethodReplacer {
+	 *  public Object reimplement(Object obj, Method method, Object[] args)
+	 *    throws Throwable {
+	 *     System.out.println("方法已经被替换!");
+	 *   return null;
+	 *  }
+	 * }
+	 *
+	 * <bean name="replacer" class="springroad.deomo.chap4.MethodReplace"> 
+	 *  </bean> 
+	 *  <bean name="testBean" class="springroad.deomo.chap4.LookupMethodBean">
+	 *   <replaced-method name="test" replacer="replacer"> </replaced-method> 
+	 *  </bean> 
+	 * </pre>
+	 * @param beanEle
+	 * @param overrides
 	 */
 	public void parseReplacedMethodSubElements(Element beanEle, MethodOverrides overrides) {
 		NodeList nl = beanEle.getChildNodes();
