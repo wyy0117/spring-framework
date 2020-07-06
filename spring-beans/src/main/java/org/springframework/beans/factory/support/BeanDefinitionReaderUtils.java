@@ -51,7 +51,7 @@ public abstract class BeanDefinitionReaderUtils {
 	 * @param className the name of the bean class, if any
 	 * @param classLoader the ClassLoader to use for loading bean classes
 	 * (can be {@code null} to just register bean classes by name)
-	 * @return the bean definition
+	 * @return the bean definition {@link GenericBeanDefinition}
 	 * @throws ClassNotFoundException if the bean class could not be loaded
 	 */
 	public static AbstractBeanDefinition createBeanDefinition(
