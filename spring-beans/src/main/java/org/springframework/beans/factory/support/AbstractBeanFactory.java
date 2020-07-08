@@ -243,6 +243,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
+		//处理beanName
 		String beanName = transformedBeanName(name);
 		Object bean;
 
@@ -1193,6 +1194,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/**
 	 * Return the bean name, stripping out the factory dereference prefix if necessary,
 	 * and resolving aliases to canonical names.
+	 *
+	 * 去除名字中包含的 {@link BeanFactory#FACTORY_BEAN_PREFIX}
+	 *
+	 * 针对别称获取到真是的beanName
+	 *
 	 * @param name the user-specified name
 	 * @return the transformed bean name
 	 */

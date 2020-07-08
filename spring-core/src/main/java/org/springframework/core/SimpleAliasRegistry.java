@@ -49,24 +49,41 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	private final Map<String, String> aliasMap = new ConcurrentHashMap<>(16);
 
 
+	/**
+	 * 若别名与beanName相同，删除别名，不需要处理
+	 * 别名与beanName不同，通过别名找已注册的名字
+	 * 		有已注册的名字
+	 * 				已注册的名字与别名相同，return
+	 * 				已注册的名字不同，检查是否允许覆盖
+	 * 		无已注册的名字
+	 * 			检查别名与beanName是否出现循环，抛异常
+	 * 			注册别名
+	 *
+	 * @param name the canonical name
+	 * @param alias the alias to be registered
+	 */
 	@Override
 	public void registerAlias(String name, String alias) {
 		Assert.hasText(name, "'name' must not be empty");
 		Assert.hasText(alias, "'alias' must not be empty");
 		synchronized (this.aliasMap) {
+			//别名与beanName相同
 			if (alias.equals(name)) {
 				this.aliasMap.remove(alias);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Alias definition '" + alias + "' ignored since it points to same name");
 				}
 			}
-			else {
+			else {//别名与beanName不同
+				//通过别名找已注册的名字
 				String registeredName = this.aliasMap.get(alias);
 				if (registeredName != null) {
+					//已注册的名字与别名相同
 					if (registeredName.equals(name)) {
 						// An existing alias - no need to re-register
 						return;
 					}
+					//已注册的名字与别名不同，且不允许别名覆盖
 					if (!allowAliasOverriding()) {
 						throw new IllegalStateException("Cannot define alias '" + alias + "' for name '" +
 								name + "': It is already registered for name '" + registeredName + "'.");
@@ -76,6 +93,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 								registeredName + "' with new target name '" + name + "'");
 					}
 				}
+				//检查beanName与别名是否出现了循环
 				checkForAliasCircle(name, alias);
 				this.aliasMap.put(alias, name);
 				if (logger.isTraceEnabled()) {
@@ -188,6 +206,9 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * Check whether the given name points back to the given alias as an alias
 	 * in the other direction already, catching a circular reference upfront
 	 * and throwing a corresponding IllegalStateException.
+	 *
+	 * 别名与beanName出现循环
+	 *
 	 * @param name the candidate name
 	 * @param alias the candidate alias
 	 * @see #registerAlias

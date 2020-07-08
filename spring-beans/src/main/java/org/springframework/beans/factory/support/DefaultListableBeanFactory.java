@@ -994,6 +994,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		//beanDefinitionMap已经存在了beanDefinition或单例缓存中存在单例对象
 		if (existingDefinition != null || containsSingleton(beanName)) {
+			//重置beanName对应的缓存
 			resetBeanDefinition(beanName);
 		}
 		else if (isConfigurationFrozen()) {
