@@ -185,7 +185,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				//双重锁
 				if (singletonObject == null && allowEarlyReference) {
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
-					//todo 如果singletonFactory == null ???
 					if (singletonFactory != null) {
 						singletonObject = singletonFactory.getObject();
 						this.earlySingletonObjects.put(beanName, singletonObject);
