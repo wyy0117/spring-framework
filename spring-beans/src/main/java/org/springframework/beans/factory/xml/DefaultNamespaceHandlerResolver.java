@@ -115,7 +115,13 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	@Override
 	@Nullable
 	public NamespaceHandler resolve(String namespaceUri) {
+		/**
+		 * 获取已有的handler映射
+		 */
 		Map<String, Object> handlerMappings = getHandlerMappings();
+		/**
+		 * 根据命名空间获取handler
+		 */
 		Object handlerOrClassName = handlerMappings.get(namespaceUri);
 		if (handlerOrClassName == null) {
 			return null;
@@ -126,13 +132,28 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 		else {
 			String className = (String) handlerOrClassName;
 			try {
+				/**
+				 * 反射加载handler类
+				 */
 				Class<?> handlerClass = ClassUtils.forName(className, this.classLoader);
+				/**
+				 * handler必须要实现{@link NamespaceHandler}接口
+				 */
 				if (!NamespaceHandler.class.isAssignableFrom(handlerClass)) {
 					throw new FatalBeanException("Class [" + className + "] for namespace [" + namespaceUri +
 							"] does not implement the [" + NamespaceHandler.class.getName() + "] interface");
 				}
+				/**
+				 * 实例化handler对象
+				 */
 				NamespaceHandler namespaceHandler = (NamespaceHandler) BeanUtils.instantiateClass(handlerClass);
+				/**
+				 * handler初始化
+				 */
 				namespaceHandler.init();
+				/**
+				 * 将handler放入缓存
+				 */
 				handlerMappings.put(namespaceUri, namespaceHandler);
 				return namespaceHandler;
 			}
@@ -160,12 +181,18 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 						logger.trace("Loading NamespaceHandler mappings from [" + this.handlerMappingsLocation + "]");
 					}
 					try {
+						/**
+						 * 加载配置，参考：spring-tx/src/main/resources/META-INF/spring.handlers
+						 */
 						Properties mappings =
 								PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation, this.classLoader);
 						if (logger.isTraceEnabled()) {
 							logger.trace("Loaded NamespaceHandler mappings: " + mappings);
 						}
 						handlerMappings = new ConcurrentHashMap<>(mappings.size());
+						/**
+						 * 放入缓存
+						 */
 						CollectionUtils.mergePropertiesIntoMap(mappings, handlerMappings);
 						this.handlerMappings = handlerMappings;
 					}
