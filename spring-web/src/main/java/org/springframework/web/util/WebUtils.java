@@ -236,14 +236,26 @@ public abstract class WebUtils {
 	 */
 	public static void setWebAppRootSystemProperty(ServletContext servletContext) throws IllegalStateException {
 		Assert.notNull(servletContext, "ServletContext must not be null");
+		/**
+		 * 获取项目在主机上的完整路径root
+		 */
 		String root = servletContext.getRealPath("/");
 		if (root == null) {
 			throw new IllegalStateException(
 					"Cannot set web app root system property when WAR file is not expanded");
 		}
+		/**
+		 * 在web.xml中获取key为webAppRootKey的value值
+		 */
 		String param = servletContext.getInitParameter(WEB_APP_ROOT_KEY_PARAM);
+		/**
+		 * 默认值为webapp.root
+		 */
 		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
 		String oldValue = System.getProperty(key);
+		/**
+		 * 确保root值是唯一的
+		 */
 		if (oldValue != null && !StringUtils.pathEquals(oldValue, root)) {
 			throw new IllegalStateException("Web app root system property already set to different value: '" +
 					key + "' = [" + oldValue + "] instead of [" + root + "] - " +

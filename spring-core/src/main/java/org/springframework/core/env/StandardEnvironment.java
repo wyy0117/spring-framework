@@ -44,7 +44,9 @@ package org.springframework.core.env;
  * <p>See {@link SystemEnvironmentPropertySource} javadoc for details on special handling
  * of property names in shell environments (e.g. Bash) that disallow period characters in
  * variable names.
- *
+ * <p>
+ *  StandardEnvironment初始化的时候就会将systemEnvironment和systemProperties加载进来
+ * </p>
  * @author Chris Beams
  * @since 3.1
  * @see ConfigurableEnvironment
@@ -69,6 +71,9 @@ public class StandardEnvironment extends AbstractEnvironment {
 	 * </ul>
 	 * <p>Properties present in {@value #SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME}.
+	 * <p>
+	 *     StandardEnvironment初始化的时候就会将systemEnvironment和systemProperties加载进来
+	 * </p>
 	 * @see AbstractEnvironment#customizePropertySources(MutablePropertySources)
 	 * @see #getSystemProperties()
 	 * @see #getSystemEnvironment()

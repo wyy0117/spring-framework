@@ -295,10 +295,21 @@ public abstract class WebApplicationContextUtils {
 			@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
 
 		Assert.notNull(sources, "'propertySources' must not be null");
+		/**
+		 * servletContextInitParams
+		 */
 		String name = StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME;
+		/**
+		 * 在org.springframework.web.context.ContextLoader#configureAndRefreshWebApplicationContext(org.springframework.web.context.ConfigurableWebApplicationContext, javax.servlet.ServletContext)
+		 * 已经执行过，所以第三项不会满足，也就不再执行替换
+		 */
 		if (servletContext != null && sources.contains(name) && sources.get(name) instanceof StubPropertySource) {
 			sources.replace(name, new ServletContextPropertySource(name, servletContext));
 		}
+		/**
+		 * servletConfigInitParams
+		 * 第三项不满足
+		 */
 		name = StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME;
 		if (servletConfig != null && sources.contains(name) && sources.get(name) instanceof StubPropertySource) {
 			sources.replace(name, new ServletConfigPropertySource(name, servletConfig));

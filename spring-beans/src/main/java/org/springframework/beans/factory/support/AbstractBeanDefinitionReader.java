@@ -86,6 +86,9 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		this.registry = registry;
 
 		// Determine ResourceLoader to use.
+		/**
+		 * 确定资源加载器使用哪个
+		 */
 		if (this.registry instanceof ResourceLoader) {
 			this.resourceLoader = (ResourceLoader) this.registry;
 		}
@@ -94,10 +97,16 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		}
 
 		// Inherit Environment if possible
+		/**
+		 * 确定environment使用哪个
+		 */
 		if (this.registry instanceof EnvironmentCapable) {
 			this.environment = ((EnvironmentCapable) this.registry).getEnvironment();
 		}
 		else {
+			/**
+			 *  StandardEnvironment初始化的时候就会将systemEnvironment和systemProperties加载进来
+			 */
 			this.environment = new StandardEnvironment();
 		}
 	}
