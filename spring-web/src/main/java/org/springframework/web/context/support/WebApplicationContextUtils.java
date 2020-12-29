@@ -183,15 +183,27 @@ public abstract class WebApplicationContextUtils {
 	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory,
 			@Nullable ServletContext sc) {
 
+		/**
+		 * 注册 {@link WebApplicationContext#SCOPE_REQUEST) scope
+		 */
 		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
+		/**
+		 * 注册 {@link WebApplicationContext#SCOPE_SESSION} scope
+		 */
 		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope());
 		if (sc != null) {
 			ServletContextScope appScope = new ServletContextScope(sc);
+			/**
+			 * 注册 {@link WebApplicationContext#SCOPE_APPLICATION) scope
+			 */
 			beanFactory.registerScope(WebApplicationContext.SCOPE_APPLICATION, appScope);
 			// Register as ServletContext attribute, for ContextCleanupListener to detect it.
 			sc.setAttribute(ServletContextScope.class.getName(), appScope);
 		}
 
+		/**
+		 * 注册可以处理的依赖
+		 */
 		beanFactory.registerResolvableDependency(ServletRequest.class, new RequestObjectFactory());
 		beanFactory.registerResolvableDependency(ServletResponse.class, new ResponseObjectFactory());
 		beanFactory.registerResolvableDependency(HttpSession.class, new SessionObjectFactory());
@@ -221,14 +233,23 @@ public abstract class WebApplicationContextUtils {
 	public static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf,
 			@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
 
+		/**
+		 * 注册单例 servletContext
+		 */
 		if (servletContext != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
 			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, servletContext);
 		}
 
+		/**
+		 * 注册单例 servletConfig
+		 */
 		if (servletConfig != null && !bf.containsBean(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME)) {
 			bf.registerSingleton(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME, servletConfig);
 		}
 
+		/**
+		 * 注册单例 {@link WebApplicationContext#CONTEXT_PARAMETERS_BEAN_NAME}
+		 */
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
 			Map<String, String> parameterMap = new HashMap<>();
 			if (servletContext != null) {
@@ -239,6 +260,9 @@ public abstract class WebApplicationContextUtils {
 				}
 			}
 			if (servletConfig != null) {
+				/**
+				 * 也就是web.xml中context-param标签里的param-name和param-value
+				 */
 				Enumeration<?> paramNameEnum = servletConfig.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
 					String paramName = (String) paramNameEnum.nextElement();
@@ -249,6 +273,9 @@ public abstract class WebApplicationContextUtils {
 					Collections.unmodifiableMap(parameterMap));
 		}
 
+		/**
+		 * 注册单例 {@link WebApplicationContext#CONTEXT_ATTRIBUTES_BEAN_NAME}
+		 */
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
 			Map<String, Object> attributeMap = new HashMap<>();
 			if (servletContext != null) {

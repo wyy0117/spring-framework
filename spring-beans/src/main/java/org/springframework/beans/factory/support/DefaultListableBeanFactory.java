@@ -1085,8 +1085,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
+		/**
+		 * 调用父类的注册单例
+		 */
 		super.registerSingleton(beanName, singletonObject);
+		/**
+		 * 更新单例的名字
+		 */
 		updateManualSingletonNames(set -> set.add(beanName), set -> !this.beanDefinitionMap.containsKey(beanName));
+		/**
+		 *清空根据类型缓存的bean和单例bean
+		 */
 		clearByTypeCache();
 	}
 
@@ -1115,6 +1124,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * (if this condition does not apply, the action can be skipped)
 	 * 如果已经有bean被创建过，锁住beanDefinitionMap，如果满足条件，则执行操作
 	 *  否则直接判断是否满足条件，在执行操作
+	 *  if判断的目的就是要对 {@link DefaultListableBeanFactory#beanDefinitionMap} 加锁
 	 */
 	private void updateManualSingletonNames(Consumer<Set<String>> action, Predicate<Set<String>> condition) {
 		if (hasBeanCreationStarted()) {
@@ -1137,6 +1147,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Remove any assumptions about by-type mappings.
+	 * <p>清空根据类型缓存的bean和单例bean</p>
 	 */
 	private void clearByTypeCache() {
 		this.allBeanNamesByType.clear();

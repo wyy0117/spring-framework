@@ -75,15 +75,27 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 
 	/** Cache of singleton objects: bean name to bean instance. */
+	/**
+	 * 缓存的单例对象
+	 */
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/** Cache of singleton factories: bean name to ObjectFactory. */
+	/**
+	 * 缓存的单例工厂
+	 */
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/** Cache of early singleton objects: bean name to bean instance. */
+	/**
+	 * 缓存的早期的单例对象
+	 */
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order. */
+	/**
+	 * 已经被注册的单例的集合
+	 */
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
 	/** Names of beans that are currently in creation. */
@@ -118,6 +130,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
 		Assert.notNull(beanName, "Bean name must not be null");
 		Assert.notNull(singletonObject, "Singleton object must not be null");
+		/**
+		 * 同一个beanName不允许注册2次
+		 */
 		synchronized (this.singletonObjects) {
 			Object oldObject = this.singletonObjects.get(beanName);
 			if (oldObject != null) {
@@ -136,9 +151,21 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void addSingleton(String beanName, Object singletonObject) {
 		synchronized (this.singletonObjects) {
+			/**
+			 * 添加缓存的单例对象
+			 */
 			this.singletonObjects.put(beanName, singletonObject);
+			/**
+			 * 移除缓存的单例工厂
+			 */
 			this.singletonFactories.remove(beanName);
+			/**
+			 * 移除早期单例对象
+			 */
 			this.earlySingletonObjects.remove(beanName);
+			/**
+			 * 添加到被注册单例beanName的集合
+			 */
 			this.registeredSingletons.add(beanName);
 		}
 	}

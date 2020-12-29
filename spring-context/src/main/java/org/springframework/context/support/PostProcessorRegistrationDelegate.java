@@ -59,15 +59,30 @@ final class PostProcessorRegistrationDelegate {
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
 		Set<String> processedBeans = new HashSet<>();
 
+		/**
+		 * 如果beanFactory是beanDefinition注册表类型的
+		 */
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+			/**
+			 * 常规处理器和注册表处理器分开
+			 */
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
 			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
+			/**
+			 * 遍历所有处理器
+			 */
 			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
+				/**
+				 * 如果处理器是beanDefinition注册表处理器
+				 */
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
 					BeanDefinitionRegistryPostProcessor registryProcessor =
 							(BeanDefinitionRegistryPostProcessor) postProcessor;
+					/**
+					 * 处理器处理注册表
+					 */
 					registryProcessor.postProcessBeanDefinitionRegistry(registry);
 					registryProcessors.add(registryProcessor);
 				}
@@ -83,17 +98,45 @@ final class PostProcessorRegistrationDelegate {
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
 
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
+			/**
+			 * 从beanFactory中获取beanDefinition注册表处理器类型的bean的名字
+			 */
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+			/**
+			 * 遍历处理器的名字
+			 */
 			for (String ppName : postProcessorNames) {
+				/**
+				 * 如果处理器是 {@link PriorityOrdered}类型
+				 */
 				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+					/**
+					 * 根据注册表处理器的名字和{@link BeanDefinitionRegistryPostProcessor}类型获取到处理器
+					 * 添加到当前的注册表处理器中
+					 */
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
+					/**
+					 * 标记已处理过的bean
+					 */
 					processedBeans.add(ppName);
 				}
 			}
+			/**
+			 * 处理器排序
+			 */
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
+			/**
+			 * 添加到注册表处理器中
+			 */
 			registryProcessors.addAll(currentRegistryProcessors);
+			/**
+			 * 执行注册表处理器，处理注册表
+			 */
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+			/**
+			 * 当前注册表处理器清空
+			 */
 			currentRegistryProcessors.clear();
 
 			// Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.
