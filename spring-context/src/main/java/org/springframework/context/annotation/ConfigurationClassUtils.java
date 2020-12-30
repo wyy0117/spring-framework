@@ -54,6 +54,9 @@ abstract class ConfigurationClassUtils {
 
 	public static final String CONFIGURATION_CLASS_LITE = "lite";
 
+	/**
+	 * org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass
+	 */
 	public static final String CONFIGURATION_CLASS_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
 
