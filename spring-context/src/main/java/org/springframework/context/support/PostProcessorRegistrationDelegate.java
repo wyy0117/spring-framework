@@ -30,11 +30,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.*;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -53,6 +49,11 @@ final class PostProcessorRegistrationDelegate {
 	}
 
 
+	/**
+	 *
+	 * @param beanFactory  是{@link DefaultListableBeanFactory} 类型
+	 * @param beanFactoryPostProcessors
+	 */
 	public static void invokeBeanFactoryPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 
@@ -120,6 +121,7 @@ final class PostProcessorRegistrationDelegate {
 			 */
 			/**
 			 * 从beanFactory中获取beanDefinition注册表处理器类型的bean的名字
+			 * {@link DefaultListableBeanFactory#getBeanNamesForType(java.lang.Class, boolean, boolean)}
 			 */
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
@@ -129,6 +131,7 @@ final class PostProcessorRegistrationDelegate {
 			for (String ppName : postProcessorNames) {
 				/**
 				 * 如果处理器是 {@link PriorityOrdered}类型
+				 * {@link AbstractBeanFactory#isTypeMatch(java.lang.String, java.lang.Class)}
 				 */
 				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 					/**
