@@ -546,9 +546,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
+				/**
+				 * 初始化消息源
+				 */
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				/**
+				 * 初始化事件广播
+				 */
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
@@ -791,7 +797,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Use parent's if none defined in this context.
 	 */
 	protected void initMessageSource() {
+		/**
+		 * 获取beanFactory
+		 */
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		/**
+		 * 如果包含了  messageSource  bean
+		 */
 		if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
 			this.messageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
 			// Make MessageSource aware of parent MessageSource.
@@ -809,9 +821,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 		else {
 			// Use empty MessageSource to be able to accept getMessage calls.
+			/**
+			 * 创建消息源
+			 */
 			DelegatingMessageSource dms = new DelegatingMessageSource();
+			/**
+			 * 获取内部的parent消息源
+			 * 设置parent消息源
+			 */
 			dms.setParentMessageSource(getInternalParentMessageSource());
 			this.messageSource = dms;
+			/**
+			 * 注册到beanFactory中
+			 */
 			beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No '" + MESSAGE_SOURCE_BEAN_NAME + "' bean, using [" + this.messageSource + "]");
@@ -825,7 +847,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	protected void initApplicationEventMulticaster() {
+		/**
+		 * 获取beanFactory
+		 */
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		/**
+		 * 如果beanFactory中已经包含了 applicationEventMulticaster   bean
+		 */
 		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster =
 					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
@@ -834,7 +862,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		else {
+			/**
+			 * 创建事件广播
+			 */
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
+			/**
+			 * 注册到beanFactory中
+			 */
 			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No '" + APPLICATION_EVENT_MULTICASTER_BEAN_NAME + "' bean, using " +
