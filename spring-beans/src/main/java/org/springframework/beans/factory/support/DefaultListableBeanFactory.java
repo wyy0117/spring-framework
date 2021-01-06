@@ -807,6 +807,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return resolver.isAutowireCandidate(holder, descriptor);
 	}
 
+	/**
+	 * 从{@link org.springframework.beans.factory.support.DefaultListableBeanFactory#beanDefinitionMap} 中直接取
+	 * @param beanName name of the bean to find a definition for
+	 * @return
+	 * @throws NoSuchBeanDefinitionException
+	 */
 	@Override
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		BeanDefinition bd = this.beanDefinitionMap.get(beanName);
@@ -869,13 +875,28 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 		// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
+		/**
+		 * 创建beanDefinitionNames的副本beanNames用于后续的遍历，以允许init等方法注册新的bean定义
+		 */
 		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
 
 		// Trigger initialization of all non-lazy singleton beans...
 		for (String beanName : beanNames) {
+			/**
+			 * 获取beanName对应的mergedBeanDefinition
+			 */
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			/**
+			 * 不抽象 是单例 不是懒加载
+			 */
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+				/**
+				 * 是否为factoryBean
+				 */
 				if (isFactoryBean(beanName)) {
+					/**
+					 * 根据beanName获取factoryBean实例
+					 */
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
 					if (bean instanceof FactoryBean) {
 						FactoryBean<?> factory = (FactoryBean<?>) bean;
@@ -889,12 +910,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							isEagerInit = (factory instanceof SmartFactoryBean &&
 									((SmartFactoryBean<?>) factory).isEagerInit());
 						}
+						/**
+						 * 需要急切实例化，则通过beanName获取bean实例
+						 */
 						if (isEagerInit) {
 							getBean(beanName);
 						}
 					}
 				}
 				else {
+					/**
+					 * 不是factoryBean，直接实例化
+					 */
 					getBean(beanName);
 				}
 			}
@@ -902,9 +929,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Trigger post-initialization callback for all applicable beans...
 		for (String beanName : beanNames) {
+			/**
+			 * 取到bean实例
+			 */
 			Object singletonInstance = getSingleton(beanName);
 			if (singletonInstance instanceof SmartInitializingSingleton) {
 				SmartInitializingSingleton smartSingleton = (SmartInitializingSingleton) singletonInstance;
+				/**
+				 * 触发org.springframework.beans.factory.SmartInitializingSingleton#afterSingletonsInstantiated()方法
+				 */
 				if (System.getSecurityManager() != null) {
 					AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
 						smartSingleton.afterSingletonsInstantiated();

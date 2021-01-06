@@ -198,6 +198,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Map from bean name to merged RootBeanDefinition.
+	 * merged过得
 	 */
 	private final Map<String, RootBeanDefinition> mergedBeanDefinitions = new ConcurrentHashMap<>(256);
 
@@ -267,7 +268,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
-	 *
+	 * <p>通过getBean(&beanName)拿到的是FactoryBean本身；通过getBean(beanName)拿到的是FactoryBean创建的Bean实例</p>
 	 * @param name          the name of the bean to retrieve
 	 * @param requiredType  the required type of the bean to retrieve
 	 * @param args          arguments to use when creating a bean instance using explicit arguments
@@ -304,7 +305,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
-			//返回对应的实例，有时候存在BeanFactory的情况并不是直接返回实例本身而是返回指定方法返回的实例
+			/**
+			 * 	返回对应的实例，有时候存在BeanFactory的情况并不是直接返回实例本身而是返回指定方法返回的实例
+			 */
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		} else {
 			// Fail if we're already creating this bean instance:
@@ -1381,25 +1384,49 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				mbd = this.mergedBeanDefinitions.get(beanName);
 			}
 
+			/**
+			 * 没有在merge过的缓存中，或者仍然需要merge
+			 */
 			if (mbd == null || mbd.stale) {
 				previous = mbd;
+				/**
+				 * 需要merge的beanDefinition没有parent
+				 */
 				if (bd.getParentName() == null) {
 					// Use copy of given root bean definition.
 					if (bd instanceof RootBeanDefinition) {
+						/**
+						 * merge后的先赋值为原beanDefinition克隆一下
+						 */
 						mbd = ((RootBeanDefinition) bd).cloneBeanDefinition();
 					} else {
 						mbd = new RootBeanDefinition(bd);
 					}
 				} else {
 					// Child bean definition: needs to be merged with parent.
+					/**
+					 * 有parent，肯定需要merge
+					 */
 					BeanDefinition pbd;
 					try {
 						String parentBeanName = transformedBeanName(bd.getParentName());
 						if (!beanName.equals(parentBeanName)) {
+							/**
+							 * 递归找parent merge过的beanDefinition
+							 */
 							pbd = getMergedBeanDefinition(parentBeanName);
 						} else {
+							/**
+							 * 此时，parent的beanName与beanDefinition的name一样
+							 */
+							/**
+							 * 获取到parentBeanFactory
+							 */
 							BeanFactory parent = getParentBeanFactory();
 							if (parent instanceof ConfigurableBeanFactory) {
+								/**
+								 * 拿到merge后的parent beanDefinition
+								 */
 								pbd = ((ConfigurableBeanFactory) parent).getMergedBeanDefinition(parentBeanName);
 							} else {
 								throw new NoSuchBeanDefinitionException(parentBeanName,
@@ -1412,11 +1439,20 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 								"Could not resolve parent bean definition '" + bd.getParentName() + "'", ex);
 					}
 					// Deep copy with overridden values.
+					/**
+					 * 从parent beanDefinition创建RootBeanDefinition
+					 */
 					mbd = new RootBeanDefinition(pbd);
+					/**
+					 * 把BeanDefinition的属性覆盖掉上面创建的ROOTBeanDefinition
+					 */
 					mbd.overrideFrom(bd);
 				}
 
 				// Set default singleton scope, if not configured before.
+				/**
+				 * 如果还未设置scope
+				 */
 				if (!StringUtils.hasLength(mbd.getScope())) {
 					mbd.setScope(SCOPE_SINGLETON);
 				}
@@ -1435,6 +1471,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					this.mergedBeanDefinitions.put(beanName, mbd);
 				}
 			}
+			/**
+			 * todo 目前来看，如果previous！=null，那么previous=mbd，2者一样，为什么又要进入{@link AbstractBeanFactory#copyRelevantMergedBeanDefinitionCaches(org.springframework.beans.factory.support.RootBeanDefinition, org.springframework.beans.factory.support.RootBeanDefinition)}里面
+			 */
 			if (previous != null) {
 				copyRelevantMergedBeanDefinitionCaches(previous, mbd);
 			}
@@ -1982,7 +2021,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Return the bean definition for the given bean name.
-	 * Subclasses should normally implement caching, as this method is invoked
+	 * Subclasses should normally implement <b>caching</b>, as this method is invoked
 	 * by this class every time bean definition metadata is needed.
 	 * <p>Depending on the nature of the concrete bean factory implementation,
 	 * this operation might be expensive (for example, because of directory lookups

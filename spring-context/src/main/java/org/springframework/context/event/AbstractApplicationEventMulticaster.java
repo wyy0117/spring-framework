@@ -102,6 +102,10 @@ public abstract class AbstractApplicationEventMulticaster
 	}
 
 
+	/**
+	 * 先移除，再添加，相当于排序
+	 * @param listener the listener to add
+	 */
 	@Override
 	public void addApplicationListener(ApplicationListener<?> listener) {
 		synchronized (this.retrievalMutex) {

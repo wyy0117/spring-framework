@@ -54,6 +54,9 @@ public abstract class UiApplicationContextUtils {
 	 * @see #THEME_SOURCE_BEAN_NAME
 	 */
 	public static ThemeSource initThemeSource(ApplicationContext context) {
+		/**
+		 * 如果上下文环境中有  themeSource   bean
+		 */
 		if (context.containsLocalBean(THEME_SOURCE_BEAN_NAME)) {
 			ThemeSource themeSource = context.getBean(THEME_SOURCE_BEAN_NAME, ThemeSource.class);
 			// Make ThemeSource aware of parent ThemeSource.
@@ -62,6 +65,9 @@ public abstract class UiApplicationContextUtils {
 				if (hts.getParentThemeSource() == null) {
 					// Only set parent context as parent ThemeSource if no parent ThemeSource
 					// registered already.
+					/**
+					 * 设置主题源的父主题源
+					 */
 					hts.setParentThemeSource((ThemeSource) context.getParent());
 				}
 			}
