@@ -283,7 +283,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
-		//处理beanName
+		/**
+		 * 处理beanName
+		 */
 		String beanName = transformedBeanName(name);
 		Object bean;
 
@@ -294,7 +296,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		 * spring创建bean的原则是不等bean创建完成就会将创建bean的ObjectFactory提早曝光
 		 * 即将ObjectFactory加入到缓存中，一旦下个bean创建时需要依赖bean则直接使用ObjectFactory
 		 */
-		//直接尝试从缓存获取或者singletonFactories中ObjectFactory中获取
+		/**
+		 * 直接尝试从缓存获取或者singletonFactories中ObjectFactory中获取
+		 * 有可能是个FactoryBean
+		 */
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
@@ -337,7 +342,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 
-			//如果不是仅仅做类型检查而是创建bean，这里要进行记录
+			/**
+			 * 如果不是仅仅做类型检查而是创建bean，这里要进行记录
+			 */
 			if (!typeCheckOnly) {
 				markBeanAsCreated(beanName);
 			}
@@ -356,7 +363,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 									"Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
 						}
-						//缓存依赖调用
+						/**
+						 * 注册依赖的bean
+						 */
 						registerDependentBean(dep, beanName);
 						try {
 							getBean(dep);
@@ -1342,6 +1351,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (mbd != null && !mbd.stale) {
 			return mbd;
 		}
+		/**
+		 * 从缓存中取到beanName对应的beanDefinition，做merge
+		 */
 		return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
 	}
 

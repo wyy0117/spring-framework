@@ -876,7 +876,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 		// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
 		/**
-		 * 创建beanDefinitionNames的副本beanNames用于后续的遍历，以允许init等方法注册新的bean定义
+		 * 创建beanDefinitionNames的副本，beanNames用于后续的遍历，以允许init等方法注册新的bean定义
 		 */
 		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
 
