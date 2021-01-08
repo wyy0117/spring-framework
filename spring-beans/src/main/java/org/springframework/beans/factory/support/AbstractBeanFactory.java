@@ -1902,11 +1902,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
-		//name以&为前缀
+		/**
+		 * 如果要获取的bean是FactoryBean的引用，但是beanInstance不是FactoryBean的就抛异常
+		 * name以&为前缀
+		 */
 		if (BeanFactoryUtils.isFactoryDereference(name)) {
 			if (beanInstance instanceof NullBean) {
 				return beanInstance;
 			}
+			/**
+			 * name的前缀是&,但是类型不是FactoryBean，就报错
+			 */
 			if (!(beanInstance instanceof FactoryBean)) {
 				throw new BeanIsNotAFactoryException(beanName, beanInstance.getClass());
 			}
@@ -1919,28 +1925,42 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
 		// If it's a FactoryBean, we use it to create a bean instance, unless the
 		// caller actually wants a reference to the factory.
-		//已经是一个bean实例
+		/**
+		 * 如果这个bean实例不是FactoryBean，就直接返回beanInstance,因为不是FactoryBean那肯定就是正常的bean了
+		 */
 		if (!(beanInstance instanceof FactoryBean)) {
 			return beanInstance;
 		}
-		//此时beanInstance是一个FactoryBean
-
+		/**
+		 * 此时beanInstance是一个FactoryBean
+		 */
 		Object object = null;
 		if (mbd != null) {
 			mbd.isFactoryBean = true;
 		} else {
+			/**
+			 * 从factoryBean中取缓存的对象
+			 */
 			object = getCachedObjectForFactoryBean(beanName);
 		}
 		if (object == null) {
 			// Return bean instance from factory.
 			FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
 			// Caches object obtained from FactoryBean if it is a singleton.
+			/**
+			 * 缓存中包含该beanName
+			 */
 			if (mbd == null && containsBeanDefinition(beanName)) {
-				//将GernericBeanDefinition 转换为 RootBeanDefinition
+				/**
+				 * 根据beanName获取merge后的beanDefinition
+				 */
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
 			//是否是用户定义的
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
+			/**
+			 * 从factoryBean中获取对象
+			 */
 			object = getObjectFromFactoryBean(factory, beanName, !synthetic);
 		}
 		return object;

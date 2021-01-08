@@ -386,6 +386,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		Assert.notNull(event, "Event must not be null");
 
 		// Decorate event as an ApplicationEvent if necessary
+		/**
+		 * 将事件装饰成ApplicationEvent
+		 */
 		ApplicationEvent applicationEvent;
 		if (event instanceof ApplicationEvent) {
 			applicationEvent = (ApplicationEvent) event;
@@ -398,14 +401,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Multicast right now if possible - or lazily once the multicaster is initialized
+		/**
+		 * {@link AbstractApplicationContext#prepareRefresh()}会初始化{@link AbstractApplicationContext#earlyApplicationEvents}
+		 */
 		if (this.earlyApplicationEvents != null) {
 			this.earlyApplicationEvents.add(applicationEvent);
 		}
 		else {
+			/**
+			 * 使用事件广播器广播事件到相应的监听器
+			 */
 			getApplicationEventMulticaster().multicastEvent(applicationEvent, eventType);
 		}
 
 		// Publish event via parent context as well...
+		/**
+		 * 通过parent发布事件
+		 */
 		if (this.parent != null) {
 			if (this.parent instanceof AbstractApplicationContext) {
 				((AbstractApplicationContext) this.parent).publishEvent(event, eventType);
@@ -650,6 +662,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Allow for the collection of early ApplicationEvents,
 		// to be published once the multicaster is available...
+		/**
+		 * 允许收集早期的ApplicationEvent，一旦多播器可用，便会发布
+		 */
 		this.earlyApplicationEvents = new LinkedHashSet<>();
 	}
 
@@ -889,10 +904,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Initialize the LifecycleProcessor.
 	 * Uses DefaultLifecycleProcessor if none defined in the context.
+	 * <p>设置 lifecycleProcessor  bean</p>
 	 * @see org.springframework.context.support.DefaultLifecycleProcessor
 	 */
 	protected void initLifecycleProcessor() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		/**
+		 * 设置 lifecycleProcessor  bean
+		 */
 		if (beanFactory.containsLocalBean(LIFECYCLE_PROCESSOR_BEAN_NAME)) {
 			this.lifecycleProcessor =
 					beanFactory.getBean(LIFECYCLE_PROCESSOR_BEAN_NAME, LifecycleProcessor.class);
@@ -938,6 +957,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
+		/**
+		 * 后面为监听器广播事件的时候会用到{@link SimpleApplicationEventMulticaster#multicastEvent(org.springframework.context.ApplicationEvent, org.springframework.core.ResolvableType)}
+		 */
 		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
 		/**
 		 * 添加监听器bean
@@ -1016,15 +1038,27 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void finishRefresh() {
 		// Clear context-level resource caches (such as ASM metadata from scanning).
+		/**
+		 * 清除资源缓存
+		 */
 		clearResourceCaches();
 
 		// Initialize lifecycle processor for this context.
+		/**
+		 * 初始化生命周期处理器
+		 */
 		initLifecycleProcessor();
 
 		// Propagate refresh to lifecycle processor first.
+		/**
+		 * 将刷新完毕事件传播到生命周期处理器
+		 */
 		getLifecycleProcessor().onRefresh();
 
 		// Publish the final event.
+		/**
+		 * 推送上下文刷新完毕事件
+		 */
 		publishEvent(new ContextRefreshedEvent(this));
 
 		// Participate in LiveBeansView MBean, if active.

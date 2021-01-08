@@ -44,6 +44,10 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	private final ApplicationListener<ApplicationEvent> delegate;
 
 	@Nullable
+	/**
+	 * listener声明的事件类型
+	 * org.springframework.context.event.GenericApplicationListenerAdapter#GenericApplicationListenerAdapter(org.springframework.context.ApplicationListener)
+	 */
 	private final ResolvableType declaredEventType;
 
 
