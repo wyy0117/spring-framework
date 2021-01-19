@@ -147,6 +147,9 @@ abstract class ConfigurationClassUtils {
 	/**
 	 * Check the given metadata for a configuration class candidate
 	 * (or nested component class declared within a configuration/component class).
+	 * <p>
+	 * metadata里的注解 如果存在：{@link Configuration}，{@link Component}，{@link ComponentScan},{@link Import}，{@link ImportResource}这几个注解,或者类里面有@Bean注解的方法
+	 * </p>
 	 * @param metadata the metadata of the annotated class
 	 * @return {@code true} if the given class is to be registered for
 	 * configuration class processing; {@code false} otherwise

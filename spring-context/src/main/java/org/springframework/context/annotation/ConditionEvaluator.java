@@ -34,6 +34,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
@@ -78,11 +79,20 @@ class ConditionEvaluator {
 	 * @return if the item should be skipped
 	 */
 	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
+		/**
+		 * 如果没有标注{@link Conditional}注解，肯定不用跳过
+		 */
 		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
 			return false;
 		}
 
 		if (phase == null) {
+			/**
+			 * 是注解类型元数据，且metadata里的注解存在：{@link Configuration}，{@link Component}，{@link ComponentScan},{@link Import}，{@link ImportResource}这几个注解,或者类里面有@Bean注解的方法
+			 * phase = {@link ConfigurationPhase#PARSE_CONFIGURATION}递归
+			 *
+			 * <p>否则phase = {@link ConfigurationPhase#REGISTER_BEAN}递归</p>
+			 */
 			if (metadata instanceof AnnotationMetadata &&
 					ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata) metadata)) {
 				return shouldSkip(metadata, ConfigurationPhase.PARSE_CONFIGURATION);
@@ -91,20 +101,38 @@ class ConditionEvaluator {
 		}
 
 		List<Condition> conditions = new ArrayList<>();
+		/**
+		 * 遍历 {@link Conditional}注解中的{@link Condition}类
+		 */
 		for (String[] conditionClasses : getConditionClasses(metadata)) {
 			for (String conditionClass : conditionClasses) {
+				/**
+				 * 反射创建 {@link Condition} 实例
+				 */
 				Condition condition = getCondition(conditionClass, this.context.getClassLoader());
 				conditions.add(condition);
 			}
 		}
 
+		/**
+		 * 排序
+		 */
 		AnnotationAwareOrderComparator.sort(conditions);
 
 		for (Condition condition : conditions) {
 			ConfigurationPhase requiredPhase = null;
+			/**
+			 * condition实现了 {@link ConfigurationCondition}接口
+			 * <p>requiredPhase通过{@link ConfigurationCondition#getConfigurationPhase()}方法取到</p>
+			 */
 			if (condition instanceof ConfigurationCondition) {
 				requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
 			}
+			/**
+			 * condition没有实现{@link ConfigurationCondition}接口 或 实现方法返回的 {@link ConfigurationPhase} 与上面递归赋值的一致
+			 * <p>且调用{@link Condition#matches(org.springframework.context.annotation.ConditionContext, org.springframework.core.type.AnnotatedTypeMetadata)} 方法不匹配</p>
+			 * 需要跳过
+			 */
 			if ((requiredPhase == null || requiredPhase == phase) && !condition.matches(this.context, metadata)) {
 				return true;
 			}

@@ -277,7 +277,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		 */
 		for (String basePackage : basePackages) {
 			/**
-			 * 扫描一个包，找出符合条件的组件
+			 * 扫描一个包，找出候选的组件
 			 */
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
 			for (BeanDefinition candidate : candidates) {
@@ -291,16 +291,28 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				 */
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 				if (candidate instanceof AbstractBeanDefinition) {
+					/**
+					 * 处理beanDefinition
+					 */
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
+					/**
+					 * 处理注解信息
+					 */
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				/**
+				 * 校验beanName和beanDefinition
+				 */
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
+					/**
+					 * 注册beanDefinition
+					 */
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}
