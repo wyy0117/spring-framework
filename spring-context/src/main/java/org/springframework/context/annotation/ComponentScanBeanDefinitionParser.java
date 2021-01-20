@@ -175,25 +175,45 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			XmlReaderContext readerContext, Set<BeanDefinitionHolder> beanDefinitions, Element element) {
 
 		Object source = readerContext.extractSource(element);
+		/**
+		 * 复合组件定义
+		 */
 		CompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(), source);
 
 		for (BeanDefinitionHolder beanDefHolder : beanDefinitions) {
+			/**
+			 * bean组件定义初始化
+			 * <p>添加到复合组件中</p>
+			 */
 			compositeDef.addNestedComponent(new BeanComponentDefinition(beanDefHolder));
 		}
 
 		// Register annotation config processors, if necessary.
+		/**
+		 * 注解配置，默认为true
+		 */
 		boolean annotationConfig = true;
 		if (element.hasAttribute(ANNOTATION_CONFIG_ATTRIBUTE)) {
 			annotationConfig = Boolean.parseBoolean(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));
 		}
 		if (annotationConfig) {
+			/**
+			 * 注册注解配置处理器
+			 */
 			Set<BeanDefinitionHolder> processorDefinitions =
 					AnnotationConfigUtils.registerAnnotationConfigProcessors(readerContext.getRegistry(), source);
 			for (BeanDefinitionHolder processorDefinition : processorDefinitions) {
+				/**
+				 * 添加到复合组件中
+				 *
+				 */
 				compositeDef.addNestedComponent(new BeanComponentDefinition(processorDefinition));
 			}
 		}
 
+		/**
+		 * 触发组件注册事件，默认空方法
+		 */
 		readerContext.fireComponentRegistered(compositeDef);
 	}
 

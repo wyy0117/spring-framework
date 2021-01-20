@@ -54,6 +54,7 @@ public interface ClassMetadata {
 	/**
 	 * Return whether the underlying class represents a concrete class,
 	 * i.e. neither an interface nor an abstract class.
+	 * <p>不是接口，不是抽象类</p>
 	 */
 	default boolean isConcrete() {
 		return !(isInterface() || isAbstract());

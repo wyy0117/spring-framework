@@ -435,6 +435,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
 						/**
 						 * 判断是否是候选组件
+						 * <p>{@link ClassPathScanningCandidateComponentProvider#excludeFilters}，{@link ClassPathScanningCandidateComponentProvider#includeFilters}和{@link Conditional}</p>
 						 */
 						if (isCandidateComponent(metadataReader)) {
 							/**
@@ -497,6 +498,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	/**
 	 * Determine whether the given class does not match any exclude filter
 	 * and does match at least one include filter.
+	 * <p>{@link ClassPathScanningCandidateComponentProvider#excludeFilters}，{@link ClassPathScanningCandidateComponentProvider#includeFilters}和{@link Conditional}</p>
 	 * @param metadataReader the ASM ClassReader for the class
 	 * @return whether the class qualifies as a candidate component
 	 */
@@ -533,6 +535,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * <p>The default implementation checks whether the class is not an interface
 	 * and not dependent on an enclosing class.
 	 * <p>Can be overridden in subclasses.
+	 * <P>是独立的（是顶级类，不是嵌套类，不是内部类），是具体的（不是接口，不抽象）</P>
+	 * <P>或者抽象且有方法有{@link Lookup}注解</P>
 	 * @param beanDefinition the bean definition to check
 	 * @return whether the bean definition qualifies as a candidate component
 	 */

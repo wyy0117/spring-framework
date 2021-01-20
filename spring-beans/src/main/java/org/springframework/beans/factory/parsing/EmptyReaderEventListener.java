@@ -30,6 +30,10 @@ public class EmptyReaderEventListener implements ReaderEventListener {
 		// no-op
 	}
 
+	/**
+	 * 默认是空方法
+	 * @param componentDefinition a descriptor for the new component
+	 */
 	@Override
 	public void componentRegistered(ComponentDefinition componentDefinition) {
 		// no-op

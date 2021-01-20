@@ -78,18 +78,28 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	@Override
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		if (definition instanceof AnnotatedBeanDefinition) {
+			/**
+			 * 读取Component注解的值，如果有多个（Component，Service等），需要一致
+			 */
 			String beanName = determineBeanNameFromAnnotation((AnnotatedBeanDefinition) definition);
+			/**
+			 * 生成的beanName不能为空，如果为空，则走下面生成默认beanName的方法
+			 */
 			if (StringUtils.hasText(beanName)) {
 				// Explicit bean name found.
 				return beanName;
 			}
 		}
 		// Fallback: generate a unique default bean name.
+		/**
+		 * 根据className
+		 */
 		return buildDefaultBeanName(definition, registry);
 	}
 
 	/**
 	 * Derive a bean name from one of the annotations on the class.
+	 * <p>读取Component注解的值，如果有多个（Component，Service等），需要一致 </p>
 	 * @param annotatedDef the annotation-aware bean definition
 	 * @return the bean name, or {@code null} if none is found
 	 */
@@ -160,6 +170,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * <p>Note that inner classes will thus have names of the form
 	 * "outerClassName.InnerClassName", which because of the period in the
 	 * name may be an issue if you are autowiring by name.
+	 * <p>类名第一个字母小写，如果是内部类，那么中间会用.链接</p>
 	 * @param definition the bean definition to build a bean name for
 	 * @return the default bean name (never {@code null})
 	 */
