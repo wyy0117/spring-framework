@@ -226,6 +226,9 @@ class ConfigurationClassParser {
 			return;
 		}
 
+		/**
+		 * 如果已经处理过，就不在处理
+		 */
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
 		if (existingClass != null) {
 			if (configClass.isImported()) {
@@ -244,6 +247,9 @@ class ConfigurationClassParser {
 		}
 
 		// Recursively process the configuration class and its superclass hierarchy.
+		/**
+		 * 转成SourceClass类开始处理
+		 */
 		SourceClass sourceClass = asSourceClass(configClass, filter);
 		do {
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
@@ -355,6 +361,9 @@ class ConfigurationClassParser {
 		if (!memberClasses.isEmpty()) {
 			List<SourceClass> candidates = new ArrayList<>(memberClasses.size());
 			for (SourceClass memberClass : memberClasses) {
+				/**
+				 * 类是配置类
+				 */
 				if (ConfigurationClassUtils.isConfigurationCandidate(memberClass.getMetadata()) &&
 						!memberClass.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {
 					candidates.add(memberClass);
@@ -362,6 +371,9 @@ class ConfigurationClassParser {
 			}
 			OrderComparator.sort(candidates);
 			for (SourceClass candidate : candidates) {
+				/**
+				 * 不能出现循环import
+				 */
 				if (this.importStack.contains(configClass)) {
 					this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 				}
@@ -539,12 +551,21 @@ class ConfigurationClassParser {
 			throws IOException {
 
 		if (visited.add(sourceClass)) {
+			/**
+			 * 会过滤掉"java.lang.annotation"和"org.springframework.stereotype"下的注解
+			 */
 			for (SourceClass annotation : sourceClass.getAnnotations()) {
 				String annName = annotation.getMetadata().getClassName();
 				if (!annName.equals(Import.class.getName())) {
+					/**
+					 * 递归搜集注解上的Import
+					 */
 					collectImports(annotation, imports, visited);
 				}
 			}
+			/**
+			 * 自己的Import注解
+			 */
 			imports.addAll(sourceClass.getAnnotationAttributes(Import.class.getName(), "value"));
 		}
 	}
@@ -557,6 +578,9 @@ class ConfigurationClassParser {
 			return;
 		}
 
+		/**
+		 * 检查循环引用
+		 */
 		if (checkForCircularImports && isChainedImportOnStack(configClass)) {
 			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 		}
@@ -1026,6 +1050,10 @@ class ConfigurationClassParser {
 			return result;
 		}
 
+		/**
+		 * 会过滤掉"java.lang.annotation"和"org.springframework.stereotype"下的注解
+		 * @return
+		 */
 		public Set<SourceClass> getAnnotations() {
 			Set<SourceClass> result = new LinkedHashSet<>();
 			if (this.source instanceof Class) {

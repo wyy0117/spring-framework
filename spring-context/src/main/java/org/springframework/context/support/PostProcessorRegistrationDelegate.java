@@ -88,7 +88,7 @@ final class PostProcessorRegistrationDelegate {
 					BeanDefinitionRegistryPostProcessor registryProcessor =
 							(BeanDefinitionRegistryPostProcessor) postProcessor;
 					/**
-					 * 执行注册表处理器的 {@link BeanDefinitionRegistryPostProcessor#postProcessBeanDefinitionRegistry(org.springframework.beans.factory.support.BeanDefinitionRegistry)}
+					 * 执行bean定义注册表处理器的 {@link BeanDefinitionRegistryPostProcessor#postProcessBeanDefinitionRegistry(org.springframework.beans.factory.support.BeanDefinitionRegistry)}
 					 * 方法，处理注册表
 					 */
 					registryProcessor.postProcessBeanDefinitionRegistry(registry);
@@ -188,7 +188,7 @@ final class PostProcessorRegistrationDelegate {
 			 */
 			registryProcessors.addAll(currentRegistryProcessors);
 			/**
-			 * 助兴注册表处理器
+			 * 执行bean定义注册表处理器
 			 */
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			/**

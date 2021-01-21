@@ -268,7 +268,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 		List<BeanDefinitionHolder> configCandidates = new ArrayList<>();
 		/**
-		 * 候选的名字
+		 * 所有bean定义的名字作为候选
 		 */
 		String[] candidateNames = registry.getBeanDefinitionNames();
 
@@ -280,7 +280,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				}
 			}
 			/**
-			 * 检查是否是配置类候选
+			 * 检查beanDefinition是否是配置类候选
 			 */
 			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
 				/**
@@ -336,7 +336,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		/**
 		 * todo 为什么开始的时候不直接放到set中
-		 * 此时一定是有BeanDefinitionHolder的
+		 * <p>此时一定是有BeanDefinitionHolder的</p>
+		 * <p>配置类候选的beanDefinition</p>
 		 */
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());

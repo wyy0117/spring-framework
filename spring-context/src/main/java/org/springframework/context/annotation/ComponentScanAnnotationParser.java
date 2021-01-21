@@ -73,6 +73,13 @@ class ComponentScanAnnotationParser {
 	}
 
 
+	/**
+	 * 创建ClassPathBeanDefinitionScanner，配置scanner的nameGenerator，scopedProxy，scopeResolver，resourcePattern，includeFilters，excludeFilters，lazyInit等属性
+	 * 执行scan {@link ClassPathBeanDefinitionScanner#doScan(java.lang.String...)}
+	 * @param componentScan
+	 * @param declaringClass
+	 * @return
+	 */
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
