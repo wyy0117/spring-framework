@@ -274,6 +274,9 @@ class ConfigurationClassParser {
 
 		if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
 			// Recursively process any member (nested) classes first
+			/**
+			 * 处理内部类
+			 */
 			processMemberClasses(configClass, sourceClass, filter);
 		}
 
@@ -297,6 +300,9 @@ class ConfigurationClassParser {
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				/**
+				 * 使用组件扫描解析器解析
+				 */
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
@@ -323,6 +329,9 @@ class ConfigurationClassParser {
 			Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
 			for (String resource : resources) {
 				String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);
+				/**
+				 * 添加导入的资源
+				 */
 				configClass.addImportedResource(resolvedResource, readerClass);
 			}
 		}
@@ -330,10 +339,16 @@ class ConfigurationClassParser {
 		// Process individual @Bean methods
 		Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(sourceClass);
 		for (MethodMetadata methodMetadata : beanMethods) {
+			/**
+			 * 添加标注了{@link Bean}的方法
+			 */
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
 
 		// Process default methods on interfaces
+		/**
+		 * java8+中接口的默认方法实现
+		 */
 		processInterfaces(configClass, sourceClass);
 
 		// Process superclass, if any
@@ -408,6 +423,7 @@ class ConfigurationClassParser {
 
 	/**
 	 * Retrieve the metadata for all <code>@Bean</code> methods.
+	 * <p>找出所有带有{@link Bean} 注解的方法</p>
 	 */
 	private Set<MethodMetadata> retrieveBeanMethodMetadata(SourceClass sourceClass) {
 		AnnotationMetadata original = sourceClass.getMetadata();
@@ -558,7 +574,7 @@ class ConfigurationClassParser {
 				String annName = annotation.getMetadata().getClassName();
 				if (!annName.equals(Import.class.getName())) {
 					/**
-					 * 递归搜集注解上的Import
+					 * 递归搜集注解上的{@link Import},有可能注解上的注解有{@link Import}
 					 */
 					collectImports(annotation, imports, visited);
 				}
@@ -570,6 +586,15 @@ class ConfigurationClassParser {
 		}
 	}
 
+	/**
+	 * 处理{@link Import} 注解
+	 *
+	 * @param configClass
+	 * @param currentSourceClass
+	 * @param importCandidates
+	 * @param exclusionFilter
+	 * @param checkForCircularImports
+	 */
 	private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,
 			Collection<SourceClass> importCandidates, Predicate<String> exclusionFilter,
 			boolean checkForCircularImports) {
@@ -601,6 +626,9 @@ class ConfigurationClassParser {
 							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
 						}
 						else {
+							/**
+							 * {@link  ImportSelector#selectImports(org.springframework.core.type.AnnotationMetadata)}指明了需要Import哪些类作为bean
+							 */
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames, exclusionFilter);
 							processImports(configClass, currentSourceClass, importSourceClasses, exclusionFilter, false);

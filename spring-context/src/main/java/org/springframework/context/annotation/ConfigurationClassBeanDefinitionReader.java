@@ -113,6 +113,7 @@ class ConfigurationClassBeanDefinitionReader {
 	/**
 	 * Read {@code configurationModel}, registering bean definitions
 	 * with the registry based on its contents.
+	 * {@link ConfigurationClassPostProcessor#processConfigBeanDefinitions(org.springframework.beans.factory.support.BeanDefinitionRegistry)}
 	 */
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
 		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
