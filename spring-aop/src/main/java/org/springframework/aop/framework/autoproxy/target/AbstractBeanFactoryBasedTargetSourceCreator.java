@@ -99,6 +99,9 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 			logger.debug("Configuring AbstractBeanFactoryBasedTargetSource: " + targetSource);
 		}
 
+		/**
+		 * 获取或创建beanName对应的beanFactory
+		 */
 		DefaultListableBeanFactory internalBeanFactory = getInternalBeanFactoryForBean(beanName);
 
 		// We need to override just this bean definition, as it may reference other beans

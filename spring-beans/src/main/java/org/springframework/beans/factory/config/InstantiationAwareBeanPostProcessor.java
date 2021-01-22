@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.lang.Nullable;
 
 /**
@@ -61,6 +62,9 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * {@link SmartInstantiationAwareBeanPostProcessor} interface in order
 	 * to predict the type of the bean object that they are going to return here.
 	 * <p>The default implementation returns {@code null}.
+	 *
+	 * <p>一般是创建代理对象，而不是目标对象，如果创建成功，只会执行初始化after方法{@link BeanPostProcessor#postProcessAfterInitialization(java.lang.Object, java.lang.String)}</p>
+	 *
 	 * @param beanClass the class of the bean to be instantiated
 	 * @param beanName the name of the bean
 	 * @return the bean object to expose instead of a default instance of the target bean,
@@ -81,6 +85,9 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * <p>This is the ideal callback for performing custom field injection on the given bean
 	 * instance, right before Spring's autowiring kicks in.
 	 * <p>The default implementation returns {@code true}.
+	 *
+	 * <P>填充属性，如果实现了该接口，spring默认的填充属性会根据改方法返回的boolean值判断是否被跳过{@link AbstractAutowireCapableBeanFactory#populateBean(java.lang.String, org.springframework.beans.factory.support.RootBeanDefinition, org.springframework.beans.BeanWrapper)}</P>
+	 *
 	 * @param bean the bean instance created, with properties not having been set yet
 	 * @param beanName the name of the bean
 	 * @return {@code true} if properties should be set on the bean; {@code false}
