@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.TargetClassAware;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.autoproxy.TargetSourceCreator;
@@ -89,6 +90,9 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	@Override
 	@Nullable
 	public final TargetSource getTargetSource(Class<?> beanClass, String beanName) {
+		/**
+		 * 实现了{@link BeanFactoryAware}和{@link TargetClassAware}接口
+		 */
 		AbstractBeanFactoryBasedTargetSource targetSource =
 				createBeanFactoryBasedTargetSource(beanClass, beanName);
 		if (targetSource == null) {
@@ -130,6 +134,9 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 		synchronized (this.internalBeanFactories) {
 			DefaultListableBeanFactory internalBeanFactory = this.internalBeanFactories.get(beanName);
 			if (internalBeanFactory == null) {
+				/**
+				 * 创建内部的beanFactory
+				 */
 				internalBeanFactory = buildInternalBeanFactory(this.beanFactory);
 				this.internalBeanFactories.put(beanName, internalBeanFactory);
 			}
