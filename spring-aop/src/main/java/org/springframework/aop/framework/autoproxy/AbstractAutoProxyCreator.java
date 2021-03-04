@@ -254,6 +254,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			}
 			/**
 			 * 是基础类，或者需要跳过，这些都是跟AOP相关的基础类，或者是原生实例{@link AutowireCapableBeanFactory#ORIGINAL_INSTANCE_SUFFIX}
+			 * 是否基础构件（基础构建不需要代理）：Advice、Pointcut、Advisor、AopInfrastructureBean这四类都算基础构建
 			 */
 			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
 				this.advisedBeans.put(cacheKey, Boolean.FALSE);
@@ -348,12 +349,21 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @return a proxy wrapping the bean, or the raw bean instance as-is
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+		/**
+		 *　用户自定义获取实例，不需要增强
+		 */
 		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
 			return bean;
 		}
+		/**
+		 * 被标记过不需要增强
+		 */
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
 			return bean;
 		}
+		/**
+		 *　基础类不需要增强
+		 */
 		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
 			this.advisedBeans.put(cacheKey, Boolean.FALSE);
 			return bean;
@@ -364,10 +374,19 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		 * 获取所有的增强器
 		 */
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
+		/**
+		 *　存在增强
+		 */
 		if (specificInterceptors != DO_NOT_PROXY) {
+			/**
+			 *　标记需要增强
+			 */
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
 			/**
 			 * 创建代理
+			 */
+			/**
+			 * 创建代理增强类
 			 */
 			Object proxy = createProxy(
 					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));

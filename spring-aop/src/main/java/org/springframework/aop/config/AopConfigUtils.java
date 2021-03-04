@@ -64,6 +64,11 @@ public abstract class AopConfigUtils {
 	}
 
 
+	/**
+	 * 注册 {@link InfrastructureAdvisorAutoProxyCreator}组件
+	 * @param registry
+	 * @return
+	 */
 	@Nullable
 	public static BeanDefinition registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
 		return registerAutoProxyCreatorIfNecessary(registry, null);
@@ -130,11 +135,21 @@ public abstract class AopConfigUtils {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 
+		/**
+		 * 如果已经包含了内部的自动代理创建器
+		 */
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+			/**
+			 * 内部的代理创建器与与要注册的代理创建器类名不同
+			 */
 			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
 				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
 				int requiredPriority = findPriorityForClass(cls);
+				/**
+				 * 已有的代理创建器的优先级比要注册的代理优先级小，那么设置自动代理创建器的类名为要注册的类名
+				 * {@link InfrastructureAdvisorAutoProxyCreator}下标为0，所以会直接返回
+				 */
 				if (currentPriority < requiredPriority) {
 					apcDefinition.setBeanClassName(cls.getName());
 				}
